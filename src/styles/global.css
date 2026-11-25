@@ -1,0 +1,306 @@
+/* Self-hosted fonts: no render-blocking requests to Google Fonts. */
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/cormorant-garamond/latin-600-italic.css';
+@import '@fontsource-variable/inter/index.css';
+
+@import 'tailwindcss';
+
+/*
+ * Design tokens. The colour values are defaults only: BaseLayout overrides them
+ * from `hotel.theme` in src/data/hotel.ts, so rebranding happens there.
+ */
+@theme {
+  --font-serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-primary-900: #4a0f19;
+  --color-primary-800: #5e1522;
+  --color-primary-700: #7a1c2c;
+  --color-primary-600: #922638;
+  --color-primary-100: #f6e6e8;
+
+  --color-accent-700: #8a5806;
+  --color-accent-500: #d99a1e;
+  --color-accent-400: #e8b04a;
+  --color-accent-300: #f2cc7a;
+
+  --color-cream-50: #fdfaf4;
+  --color-cream-100: #f8f1e4;
+  --color-cream-200: #efe3cc;
+
+  --color-ink-900: #1f1d1b;
+  --color-ink-700: #3a3633;
+  --color-ink-500: #5c5650;
+}
+
+/* Height of the demo banner at the top (0 when it is turned off). */
+:root {
+  --banner-h: 0px;
+}
+:root.has-demo-banner {
+  --banner-h: 2.25rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(5.5rem + var(--banner-h));
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+  body {
+    @apply bg-cream-50 font-sans text-ink-900 antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif font-semibold tracking-tight text-balance;
+    line-height: 1.1;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent-500;
+  }
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+}
+@utility eyebrow {
+  @apply text-xs font-semibold tracking-[0.22em] uppercase text-accent-700;
+}
+/* Buttons: a colour "fill" rises from the bottom on hover (transform only). */
+@utility btn {
+  @apply relative isolate inline-flex min-h-12 items-center justify-center gap-2 overflow-hidden rounded-full px-7 py-3 text-sm font-semibold tracking-wide transition-colors duration-500;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--btn-fill);
+    transform: translateY(101%);
+    transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+  &:hover::before,
+  &:focus-visible::before {
+    transform: translateY(0);
+  }
+}
+@utility btn-primary {
+  @apply btn bg-primary-700 text-cream-50;
+  --btn-fill: var(--color-accent-400);
+  &:hover,
+  &:focus-visible {
+    color: var(--color-ink-900);
+  }
+}
+@utility btn-accent {
+  @apply btn bg-accent-400 text-ink-900;
+  --btn-fill: var(--color-cream-50);
+}
+@utility btn-outline-light {
+  @apply btn border border-cream-50/70 text-cream-50;
+  --btn-fill: var(--color-cream-50);
+  &:hover,
+  &:focus-visible {
+    color: var(--color-ink-900);
+  }
+}
+@utility link-arrow {
+  @apply inline-flex items-center gap-1.5 font-semibold text-primary-700 underline-offset-4 hover:underline;
+}
+@utility form-label {
+  @apply mb-1.5 block text-sm font-medium text-ink-700;
+}
+@utility form-input {
+  @apply block min-h-12 w-full rounded-lg border border-ink-500/40 bg-white px-4 py-2.5 text-base text-ink-900 shadow-sm transition-colors placeholder:text-ink-500 focus:border-primary-700 focus:ring-2 focus:ring-primary-700/20 focus:outline-none;
+}
+
+/* ============================================================================
+   MOTION SUPPORT STYLES
+   ========================================================================= */
+
+/* Lenis smooth scroll (from lenis/dist/lenis.css) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+html.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+html.scroll-locked {
+  overflow: hidden;
+}
+
+/* Film grain: a static noise texture over everything (no animation, no blending cost). */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Header colour states ---------------------------------------------------- */
+.site-header {
+  --hdr-fg: var(--color-primary-800);
+  --hdr-sub: var(--color-accent-700);
+  --hdr-link: var(--color-ink-700);
+  --hdr-active-bg: var(--color-primary-100);
+  --hdr-active-fg: var(--color-primary-800);
+  color: var(--hdr-link);
+  transition: color 0.4s;
+}
+.site-header[data-overlay='true'][data-top='true'],
+.site-header[data-menu-state='open'] {
+  --hdr-fg: var(--color-cream-50);
+  --hdr-sub: var(--color-accent-300);
+  --hdr-link: var(--color-cream-50);
+  --hdr-active-bg: rgb(255 255 255 / 0.14);
+  --hdr-active-fg: var(--color-cream-50);
+}
+.site-header[data-menu-state='open'] [data-header-glass] {
+  opacity: 0 !important;
+}
+
+/* Hamburger icon morphs into an X */
+.menu-icon span {
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s;
+}
+[aria-expanded='true'] .menu-icon span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+[aria-expanded='true'] .menu-icon span:nth-child(2) {
+  opacity: 0;
+}
+[aria-expanded='true'] .menu-icon span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobile menu overlay: hidden until opened by JS */
+.mobile-menu {
+  visibility: hidden;
+}
+
+/* ---- Preloader (first visit only) ------------------------------------------- */
+.preloader {
+  display: none;
+}
+html.dv-first .preloader {
+  display: flex;
+}
+html.dv-first {
+  overflow: hidden;
+}
+
+/* ---- Custom cursor ----------------------------------------------------------- */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 95;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 999px;
+  background: var(--color-accent-500);
+}
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-accent-500) 80%, transparent);
+}
+html:not(.has-cursor) .cursor-dot,
+html:not(.has-cursor) .cursor-ring,
+html:not(.hide-native-cursor) .cursor-dot {
+  display: none;
+}
+/* Only when CURSOR.hideNativeCursor is true in config.ts */
+html.hide-native-cursor,
+html.hide-native-cursor * {
+  cursor: none !important;
+}
+html.hide-native-cursor :is(input, textarea, select, [contenteditable]) {
+  cursor: auto !important;
+}
+html.hide-native-cursor input:is([type='text'], [type='email'], [type='tel']),
+html.hide-native-cursor textarea {
+  cursor: text !important;
+}
+
+/* ---- SplitText helpers ----------------------------------------------------- */
+/* Give masked words room for descenders (g, y, p) so they are not clipped. */
+.split-word-mask {
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+/* ---- Initial states before JS animates (only when motion is allowed) --------
+   The `js-anim` class is added by an inline script in <head> and removed by a
+   failsafe if JavaScript does not start, so content is never stuck hidden. */
+.js-anim [data-split],
+.js-anim [data-hero-title] {
+  visibility: hidden;
+}
+.js-anim [data-hero-fade],
+.js-anim [data-fade] {
+  opacity: 0;
+}
+.js-anim [data-reveal-mover] {
+  transform: translateY(100%);
+}
+.js-anim [data-reveal-inner] {
+  transform: translateY(-100%) scale(1.15);
+}
+.js-anim [data-line] {
+  transform: scaleX(0);
+}
+
+/* ---- Horizontal scroll (Experiences): row on desktop, stacked on mobile ----- */
+@media (min-width: 1024px) {
+  .js-anim .hscroll-track {
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    height: 100%;
+    align-items: center;
+  }
+  .js-anim .hscroll-section {
+    height: 100svh;
+    overflow: hidden;
+  }
+}

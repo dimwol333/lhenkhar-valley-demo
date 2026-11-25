@@ -1,0 +1,126 @@
+---
+import Logo from './Logo.astro';
+import { navigation, bookingCta, hotel } from '../data/hotel';
+
+interface Props {
+  /** true when the page starts with a dark hero image under the header. */
+  overlay?: boolean;
+}
+const { overlay = true } = Astro.props;
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) => {
+  const h = href.replace(/\/$/, '') || '/';
+  return h === '/' ? path === '/' : path.startsWith(h);
+};
+---
+
+<a
+  href="#main"
+  class="sr-only z-100 rounded-md bg-primary-700 px-4 py-2 text-cream-50 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+>
+  Skip to content
+</a>
+
+<!--
+  Fixed header. Animations in src/scripts/animations/header.ts:
+  hides on scroll down, returns on scroll up, glass background after scrolling.
+-->
+<header
+  class="site-header fixed inset-x-0 top-(--banner-h) z-60"
+  data-header
+  data-overlay={String(overlay)}
+  data-top="true"
+  data-menu-state="closed"
+  transition:name="site-header"
+  transition:animate="none"
+>
+  <div
+    class="absolute inset-0 -z-10 border-b border-cream-200/70 bg-cream-50/75 opacity-0 shadow-[0_8px_30px_-12px_rgb(0_0_0/0.12)] backdrop-blur-xl backdrop-saturate-150"
+    style={overlay ? undefined : 'opacity:1'}
+    data-header-glass
+    aria-hidden="true"
+  >
+  </div>
+  <div class="container-page flex h-18 items-center justify-between gap-6 lg:h-20">
+    <a href="/" class="shrink-0">
+      <Logo />
+    </a>
+
+    <nav aria-label="Main" class="hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {
+          navigation.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                class:list={[
+                  'relative rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300',
+                  isActive(item.href) ? 'bg-(--hdr-active-bg) text-(--hdr-active-fg)' : 'hover:text-accent-500',
+                ]}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href={bookingCta.href} class="btn-primary hidden sm:inline-flex">{bookingCta.label}</a>
+      <button
+        type="button"
+        class="inline-flex h-12 w-12 items-center justify-center rounded-full text-(--hdr-fg) lg:hidden"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        data-menu-toggle
+      >
+        <span class="sr-only" data-menu-label>Open menu</span>
+        <span class="menu-icon flex w-6 flex-col gap-1.25" aria-hidden="true">
+          <span class="block h-0.5 w-full rounded bg-current"></span>
+          <span class="block h-0.5 w-full rounded bg-current"></span>
+          <span class="block h-0.5 w-full rounded bg-current"></span>
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Full-screen mobile menu (outside the header so the header's transform can't affect it) -->
+<div
+  id="mobile-menu"
+  class="mobile-menu fixed inset-0 z-55 flex flex-col overflow-y-auto bg-primary-800 pt-[calc(6rem+var(--banner-h))] pb-10 text-cream-50 lg:hidden"
+  data-menu
+  data-lenis-prevent
+>
+  <svg class="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 text-primary-700" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <path d="M16 4h8v4h4v4h4v4h4v8h-4v4h-4v4h-4v4h-8v-4h-4v-4H8v-4H4v-8h4v-4h4V8h4z" stroke="currentColor" stroke-width="0.6"></path>
+  </svg>
+  <nav aria-label="Mobile" class="container-page relative flex flex-1 flex-col">
+    <ul class="flex flex-col">
+      {
+        navigation.map((item, i) => (
+          <li class="overflow-hidden border-b border-cream-50/10">
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+              class:list={['flex items-baseline gap-4 py-4 font-serif text-4xl sm:text-5xl', isActive(item.href) ? 'text-accent-300' : 'text-cream-50']}
+              data-menu-item
+            >
+              <span class="font-sans text-xs tracking-widest text-accent-300">0{i + 1}</span>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="mt-auto pt-10" data-menu-item>
+      <a href={bookingCta.href} class="btn-accent w-full">{bookingCta.label}</a>
+      <a href={`tel:+${hotel.contact.phoneDigits}`} class="mt-4 block text-center text-sm text-cream-100">
+        Call us: <span class="font-semibold">{hotel.contact.phone}</span>
+      </a>
+    </div>
+  </nav>
+</div>

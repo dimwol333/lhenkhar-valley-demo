@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Divider from '../components/Divider.astro';
+import { hotel } from '../data/hotel';
+---
+
+<BaseLayout title={`Page not found | ${hotel.name}`} description="The page you are looking for could not be found." overlayHeader={false}>
+  <section class="container-page py-28 text-center sm:py-40">
+    <Divider class="mb-8" />
+    <p class="eyebrow mb-3">Error 404</p>
+    <h1 class="text-5xl text-primary-800 sm:text-6xl">This path leads nowhere</h1>
+    <p class="mx-auto mt-5 max-w-lg text-lg text-ink-700">The page you are looking for has moved or no longer exists.</p>
+    <a href="/" class="btn-primary mt-9">Back to home</a>
+  </section>
+</BaseLayout>

@@ -1,0 +1,31 @@
+---
+import Divider from './Divider.astro';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  intro?: string;
+  align?: 'center' | 'left';
+  /** Heading level: use 'h1' only once per page. */
+  as?: 'h1' | 'h2';
+  tone?: 'light' | 'dark';
+  divider?: boolean;
+}
+const { eyebrow, title, intro, align = 'center', as: Tag = 'h2', tone = 'light', divider = false } = Astro.props;
+const centered = align === 'center';
+---
+
+<div class:list={['max-w-3xl', centered && 'mx-auto text-center']}>
+  {divider && <Divider class="mb-8" tone={tone} />}
+  {eyebrow && <p class:list={['eyebrow mb-4', tone === 'dark' && 'text-accent-300!']} data-fade>{eyebrow}</p>}
+  <!-- data-split: words slide up from behind a mask (reveals.ts) -->
+  <Tag class:list={['text-5xl sm:text-6xl lg:text-7xl', tone === 'dark' ? 'text-cream-50' : 'text-primary-800']} data-split>{title}</Tag>
+  {
+    intro && (
+      <p class:list={['mt-6 text-lg leading-relaxed', tone === 'dark' ? 'text-cream-100' : 'text-ink-700']} data-fade>
+        {intro}
+      </p>
+    )
+  }
+  <slot />
+</div>

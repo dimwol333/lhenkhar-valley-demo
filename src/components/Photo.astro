@@ -1,0 +1,52 @@
+---
+/**
+ * Wrapper around Astro's <Image> that accepts a SiteImage from src/data/images.ts.
+ * Produces responsive, optimised WebP with lazy loading by default.
+ */
+import { Image } from 'astro:assets';
+import type { ComponentProps } from 'astro/types';
+import type { SiteImage } from '../data/images';
+
+interface Props {
+  image: SiteImage;
+  /** Responsive widths to generate. */
+  widths?: number[];
+  /** `sizes` attribute: how wide the image is shown at each breakpoint. */
+  sizes?: string;
+  class?: string;
+  /** Set true for the main above-the-fold image of a page. */
+  priority?: boolean;
+  /** Override the alt text (use '' for purely decorative images). */
+  alt?: string;
+  /** Any extra attributes (e.g. data-hero-img) are passed to the <img>. */
+  [key: `data-${string}`]: string | undefined;
+}
+
+const { image, widths = [480, 800, 1200], sizes = '100vw', class: className, priority = false, alt, ...rest } = Astro.props;
+
+const sizeProps =
+  typeof image.src === 'string'
+    ? image.width && image.height
+      ? { width: image.width, height: image.height }
+      : { inferSize: true as const }
+    : {};
+
+// Local and remote images need different props; TypeScript can't narrow the
+// union through a spread, so the combined object is cast once here.
+const imageProps = {
+  src: image.src,
+  ...sizeProps,
+  alt: alt ?? image.alt,
+  widths,
+  sizes,
+  format: 'webp',
+  quality: 72,
+  loading: priority ? 'eager' : 'lazy',
+  fetchpriority: priority ? 'high' : 'auto',
+  decoding: priority ? 'sync' : 'async',
+  class: className,
+  ...rest,
+} as ComponentProps<typeof Image>;
+---
+
+<Image {...imageProps} />

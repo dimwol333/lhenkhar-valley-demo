@@ -1,0 +1,50 @@
+---
+/**
+ * Decorative section divider inspired by the painted bands on Bhutanese
+ * dzongs and the stepped-cross motif of traditional textiles. Pure SVG.
+ */
+interface Props {
+  class?: string;
+  /** 'light' for cream backgrounds, 'dark' for primary-coloured backgrounds. */
+  tone?: 'light' | 'dark';
+}
+const { class: className = '', tone = 'light' } = Astro.props;
+const line = tone === 'dark' ? 'text-accent-400/70' : 'text-accent-500';
+const motif = tone === 'dark' ? 'text-accent-300' : 'text-primary-700';
+const uid = `dv-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class:list={['flex items-center justify-center gap-3 sm:gap-5', className]} aria-hidden="true" role="presentation">
+  <svg class:list={['h-4 w-full max-w-64 flex-1', line]} viewBox="0 0 240 16" preserveAspectRatio="xMaxYMid slice" fill="none">
+    <defs>
+      <pattern id={`${uid}-l`} width="16" height="16" patternUnits="userSpaceOnUse">
+        <path d="M8 3 13 8 8 13 3 8z" stroke="currentColor" stroke-width="1.2" />
+        <circle cx="8" cy="8" r="1.2" fill="currentColor" />
+      </pattern>
+    </defs>
+    <line x1="0" y1="8" x2="240" y2="8" stroke="currentColor" stroke-width="0.8" opacity="0.6" />
+    <rect x="96" y="0" width="144" height="16" fill={`url(#${uid}-l)`} />
+  </svg>
+  <svg class:list={['h-10 w-10 shrink-0', motif]} viewBox="0 0 40 40" fill="none">
+    <!-- Stepped cross (a common motif in Bhutanese weaving) around a lotus centre -->
+    <path
+      d="M16 4h8v4h4v4h4v4h4v8h-4v4h-4v4h-4v4h-8v-4h-4v-4H8v-4H4v-8h4v-4h4V8h4z"
+      stroke="currentColor"
+      stroke-width="1.4"
+      stroke-linejoin="round"
+    />
+    <path d="M20 12c3 3 3 9 0 12-3-3-3-9 0-12z" fill="currentColor" />
+    <path d="M12 20c3-2 6-2 8 0-2 4-6 5-8 4zM28 20c-3-2-6-2-8 0 2 4 6 5 8 4z" fill="currentColor" opacity="0.65" />
+    <circle cx="20" cy="27" r="1.5" fill="currentColor" />
+  </svg>
+  <svg class:list={['h-4 w-full max-w-64 flex-1', line]} viewBox="0 0 240 16" preserveAspectRatio="xMinYMid slice" fill="none">
+    <defs>
+      <pattern id={`${uid}-r`} width="16" height="16" patternUnits="userSpaceOnUse">
+        <path d="M8 3 13 8 8 13 3 8z" stroke="currentColor" stroke-width="1.2" />
+        <circle cx="8" cy="8" r="1.2" fill="currentColor" />
+      </pattern>
+    </defs>
+    <line x1="0" y1="8" x2="240" y2="8" stroke="currentColor" stroke-width="0.8" opacity="0.6" />
+    <rect x="0" y="0" width="144" height="16" fill={`url(#${uid}-r)`} />
+  </svg>
+</div>

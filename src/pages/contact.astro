@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { seo, hotel, rooms, contactPage, pageHeroes } from '../data/hotel';
+
+const formAction = `https://formspree.io/f/${hotel.formspreeId}`;
+const isDemo = hotel.formspreeId === 'YOUR_FORM_ID';
+const maxGuests = Math.max(...rooms.map((r) => r.maxGuests));
+const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(hotel.mapQuery)}&z=13&output=embed`;
+const whatsapp = `https://wa.me/${hotel.contact.whatsapp}`;
+---
+
+<BaseLayout title={seo.contact.title} description={seo.contact.description} ogImage={pageHeroes.contact} heroImage={pageHeroes.contact}>
+  <PageHero image={pageHeroes.contact} eyebrow="Contact & booking" title="Plan your stay with us" subtitle={contactPage.intro} />
+
+  <section id="booking" class="scroll-mt-20 py-20 sm:py-28">
+    <div class="container-page grid gap-14 lg:grid-cols-5 lg:gap-16">
+      <!-- Enquiry form -->
+      <div class="lg:col-span-3">
+        <SectionHeading eyebrow="Booking enquiry" title="Check availability" align="left" />
+        <p class="mt-5 text-ink-700" data-fade>Fields marked <span class="text-primary-700">*</span> are required. We reply within 24 hours.</p>
+
+        <form
+          action={formAction}
+          method="POST"
+          class="mt-10 grid gap-6 rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-cream-200 sm:grid-cols-2 sm:p-10"
+          data-fade
+          data-booking-form
+          data-demo={isDemo ? 'true' : undefined}
+        >
+          <input type="hidden" name="_subject" value={`New booking enquiry – ${hotel.name}`} />
+          <!-- Honeypot field to block spam bots (Formspree ignores submissions where this is filled) -->
+          <div class="hidden" aria-hidden="true">
+            <label>Leave this empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label>
+          </div>
+
+          <div>
+            <label for="name" class="form-label">Full name <span class="text-primary-700">*</span></label>
+            <input id="name" name="name" type="text" required autocomplete="name" class="form-input" />
+          </div>
+          <div>
+            <label for="email" class="form-label">Email <span class="text-primary-700">*</span></label>
+            <input id="email" name="email" type="email" required autocomplete="email" class="form-input" />
+          </div>
+          <div>
+            <label for="phone" class="form-label">Phone / WhatsApp</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+975 …" class="form-input" />
+          </div>
+          <div>
+            <label for="country" class="form-label">Country <span class="text-primary-700">*</span></label>
+            <input id="country" name="country" type="text" required autocomplete="country-name" list="country-list" class="form-input" />
+            <datalist id="country-list">
+              {contactPage.countries.map((c) => <option value={c} />)}
+            </datalist>
+          </div>
+          <div>
+            <label for="checkin" class="form-label">Check-in date <span class="text-primary-700">*</span></label>
+            <input id="checkin" name="check_in" type="date" required class="form-input" />
+          </div>
+          <div>
+            <label for="checkout" class="form-label">Check-out date <span class="text-primary-700">*</span></label>
+            <input id="checkout" name="check_out" type="date" required class="form-input" aria-describedby="checkout-error" />
+            <p id="checkout-error" class="mt-1.5 hidden text-sm text-primary-700" data-date-error>Check-out must be after check-in.</p>
+          </div>
+          <div>
+            <label for="room" class="form-label">Room type <span class="text-primary-700">*</span></label>
+            <select id="room" name="room_type" required class="form-input">
+              <option value="">Select a room</option>
+              {rooms.map((r) => <option value={r.name} data-id={r.id}>{r.name} (from {hotel.currency} {r.priceFrom})</option>)}
+              <option value="Not sure yet">Not sure yet</option>
+            </select>
+          </div>
+          <div>
+            <label for="guests" class="form-label">Number of guests <span class="text-primary-700">*</span></label>
+            <select id="guests" name="guests" required class="form-input">
+              {Array.from({ length: maxGuests + 4 }, (_, i) => i + 1).map((n) => <option value={n} selected={n === 2}>{n} {n === 1 ? 'guest' : 'guests'}</option>)}
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="message" class="form-label">Message</label>
+            <textarea id="message" name="message" rows="5" class="form-input" placeholder="Special requests, arrival time, experiences you are interested in…"></textarea>
+          </div>
+
+          <div class="sm:col-span-2">
+            <button type="submit" class="btn-primary w-full sm:w-auto sm:px-10" data-submit><span>Send enquiry</span></button>
+            <p class="mt-4 hidden rounded-xl p-4 text-sm" role="status" aria-live="polite" data-form-status></p>
+          </div>
+        </form>
+      </div>
+
+      <!-- Contact details -->
+      <aside class="lg:col-span-2" aria-labelledby="contact-details-title">
+        <div class="rounded-[1.75rem] bg-primary-800 p-8 text-cream-100 sm:p-10" data-fade>
+          <h2 id="contact-details-title" class="text-3xl text-cream-50">Get in touch</h2>
+          <ul class="mt-6 space-y-5">
+            <li>
+              <p class="text-xs font-semibold tracking-[0.2em] text-accent-300 uppercase">Phone</p>
+              <a class="mt-1 block text-lg text-cream-50 hover:text-accent-300" href={`tel:+${hotel.contact.phoneDigits}`}>{hotel.contact.phone}</a>
+            </li>
+            <li>
+              <p class="text-xs font-semibold tracking-[0.2em] text-accent-300 uppercase">WhatsApp</p>
+              <a class="mt-1 block text-lg text-cream-50 hover:text-accent-300" href={whatsapp} target="_blank" rel="noopener">Message us on WhatsApp</a>
+            </li>
+            <li>
+              <p class="text-xs font-semibold tracking-[0.2em] text-accent-300 uppercase">Email</p>
+              <a class="mt-1 block text-lg break-all text-cream-50 hover:text-accent-300" href={`mailto:${hotel.contact.email}`}>{hotel.contact.email}</a>
+            </li>
+            <li>
+              <p class="text-xs font-semibold tracking-[0.2em] text-accent-300 uppercase">Address</p>
+              <address class="mt-1 text-lg not-italic text-cream-50">
+                {hotel.address.street}, {hotel.address.region}, {hotel.address.country}
+              </address>
+            </li>
+          </ul>
+          <h3 class="mt-9 font-sans text-sm font-semibold tracking-wide text-cream-50 uppercase">Getting here</h3>
+          <ul class="mt-3 space-y-2">
+            {contactPage.gettingHere.map((g) => (
+              <li class="flex items-start gap-3">
+                <span class="mt-2 h-2 w-2 shrink-0 rotate-45 bg-accent-400" aria-hidden="true" />
+                {g}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="mt-8 overflow-hidden rounded-[1.75rem] shadow-sm ring-1 ring-cream-200" data-fade>
+          <iframe
+            src={mapSrc}
+            title={`Map showing ${hotel.mapQuery}`}
+            class="aspect-4/3 w-full border-0"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen></iframe>
+        </div>
+        <a
+          class="link-arrow mt-4"
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotel.mapQuery)}`}
+          target="_blank"
+          rel="noopener"
+        >Open in Google Maps <span aria-hidden="true">↗</span></a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

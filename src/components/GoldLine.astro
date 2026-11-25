@@ -1,0 +1,9 @@
+---
+/** Thin gold divider line that draws in from the centre (reveals.ts → [data-line]). */
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={['h-px origin-center bg-linear-to-r from-transparent via-accent-500 to-transparent', className]} data-line aria-hidden="true"></div>

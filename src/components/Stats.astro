@@ -1,0 +1,27 @@
+---
+/** Big numbers that count up on scroll. Animation: reveals.ts → initCounters() */
+import { home } from '../data/hotel';
+---
+
+<section class="relative overflow-hidden bg-primary-800 py-20 text-cream-50 sm:py-28" aria-label="The resort in numbers">
+  <svg class="pointer-events-none absolute -top-20 -left-20 h-80 w-80 text-primary-700/60" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <path d="M16 4h8v4h4v4h4v4h4v8h-4v4h-4v4h-4v4h-8v-4h-4v-4H8v-4H4v-8h4v-4h4V8h4z" stroke="currentColor" stroke-width="0.5"></path>
+  </svg>
+  <div class="container-page relative">
+    <dl class="grid gap-12 text-center sm:grid-cols-3 sm:gap-6">
+      {
+        home.stats.map((s, i) => (
+          <div class:list={['flex flex-col items-center', i > 0 && 'sm:border-l sm:border-cream-50/15']} data-fade>
+            <dt class="order-2 mt-4 text-xs font-semibold tracking-[0.22em] text-accent-300 uppercase">{s.label}</dt>
+            <dd class="order-1 font-serif text-7xl leading-none font-medium tabular-nums sm:text-8xl">
+              <span data-count data-to={s.value} data-decimals={s.decimals}>
+                {s.value.toLocaleString('en-US', { minimumFractionDigits: s.decimals })}
+              </span>
+              {s.suffix && <span class="text-4xl text-accent-300 sm:text-5xl">{s.suffix}</span>}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>

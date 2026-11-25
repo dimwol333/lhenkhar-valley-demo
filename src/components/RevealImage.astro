@@ -1,0 +1,41 @@
+---
+/**
+ * An image inside a frame that "opens like a curtain" when scrolled into view,
+ * scales down from 1.15 to 1, and (optionally) drifts with parallax.
+ * Animation code: src/scripts/animations/reveals.ts
+ *
+ * Structure (each layer has one job, so transforms never conflict):
+ *   frame (clips)  >  mover (slides up, clips)  >  inner (counter-slide + scale)  >  img (parallax)
+ */
+import Photo from './Photo.astro';
+import type { SiteImage } from '../data/images';
+
+interface Props {
+  image: SiteImage;
+  widths?: number[];
+  sizes?: string;
+  /** Classes for the outer frame: set aspect ratio and rounding here. */
+  class?: string;
+  parallax?: boolean;
+  alt?: string;
+}
+const { image, widths, sizes, class: className = '', parallax = true, alt } = Astro.props;
+---
+
+<div class:list={['relative overflow-hidden', className]} data-reveal-image data-cursor="image">
+  <div class="absolute inset-0 overflow-hidden" data-reveal-mover>
+    <div class="absolute inset-0 overflow-hidden" data-reveal-inner>
+      <Photo
+        image={image}
+        widths={widths}
+        sizes={sizes}
+        alt={alt}
+        class:list={[
+          'absolute left-0 w-full object-cover transition-[scale] duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-[1.06]',
+          parallax ? '-top-[9%] h-[118%]' : 'top-0 h-full',
+        ]}
+        {...(parallax ? { 'data-parallax': '' } : {})}
+      />
+    </div>
+  </div>
+</div>

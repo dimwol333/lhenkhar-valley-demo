@@ -1,0 +1,18 @@
+---
+interface Props {
+  rating: number;
+  max?: number;
+  class?: string;
+}
+const { rating, max = 5, class: className = '' } = Astro.props;
+---
+
+<span class:list={['inline-flex gap-0.5', className]} role="img" aria-label={`Rated ${rating} out of ${max}`}>
+  {
+    Array.from({ length: max }, (_, i) => (
+      <svg class:list={['h-4 w-4', i < rating ? 'text-accent-500' : 'text-cream-200']} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L10 14.9l-5.2 2.8 1-5.9L1.5 7.7l5.9-.8z" />
+      </svg>
+    ))
+  }
+</span>

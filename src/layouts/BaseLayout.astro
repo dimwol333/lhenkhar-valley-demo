@@ -1,0 +1,230 @@
+---
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import { ClientRouter } from 'astro:transitions';
+// Font files to preload (same files the CSS uses, so the browser reuses them).
+import serifFont from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2?url';
+import sansFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import DemoBanner from '../components/DemoBanner.astro';
+import { hotel, rooms, demoBanner } from '../data/hotel';
+import { images, type SiteImage } from '../data/images';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Image used for social sharing previews. Defaults to the home hero. */
+  ogImage?: SiteImage;
+  /** The page's hero image: preloaded so it appears as early as possible. */
+  heroImage?: SiteImage;
+  /** false for pages without a dark hero (the header then starts solid). */
+  overlayHeader?: boolean;
+}
+
+const { title, description, ogImage = images.homeHero, heroImage, overlayHeader = true } = Astro.props;
+
+// Must use exactly the same options as the hero <Photo priority> so the URLs match.
+const heroPreload = heroImage
+  ? await getImage({
+      src: heroImage.src,
+      ...(typeof heroImage.src === 'string' ? { width: heroImage.width, height: heroImage.height } : {}),
+      widths: [640, 1024, 1440, 2000],
+      sizes: '100vw',
+      format: 'webp',
+      quality: 72,
+    })
+  : null;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const canonical = new URL(Astro.url.pathname, site).href;
+
+// Social preview image: 1200x630 JPEG (best supported by Facebook, WhatsApp, etc.)
+const og = await getImage({
+  src: ogImage.src,
+  width: 1200,
+  height: 630,
+  fit: 'cover',
+  format: 'jpg',
+  quality: 75,
+});
+const ogImageUrl = new URL(og.src, site).href;
+
+// Brand colours from hotel.ts become CSS variables used by Tailwind.
+const t = hotel.theme;
+const themeCss = `:root{${Object.entries(t)
+  .flatMap(([name, shades]) =>
+    Object.entries(shades).map(([shade, value]) => `--color-${name}-${shade}:${value}`),
+  )
+  .join(';')}}`;
+
+// schema.org structured data for search engines.
+const a = hotel.address;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Hotel',
+  '@id': new URL('/#hotel', site).href,
+  name: hotel.name,
+  description: hotel.description,
+  url: new URL('/', site).href,
+  image: ogImageUrl,
+  logo: new URL('/favicon.svg', site).href,
+  telephone: hotel.contact.phone,
+  email: hotel.contact.email,
+  priceRange: hotel.priceRange,
+  currenciesAccepted: hotel.currency,
+  paymentAccepted: hotel.payments.methods.join(', '),
+  starRating: { '@type': 'Rating', ratingValue: hotel.starRating },
+  numberOfRooms: hotel.totalRooms,
+  checkinTime: hotel.checkIn,
+  checkoutTime: hotel.checkOut,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: a.street,
+    addressLocality: a.locality,
+    addressRegion: a.region,
+    ...(a.postalCode ? { postalCode: a.postalCode } : {}),
+    addressCountry: a.countryCode,
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: hotel.geo.latitude, longitude: hotel.geo.longitude },
+  hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotel.mapQuery)}`,
+  sameAs: Object.values(hotel.social),
+  amenityFeature: [...new Set(rooms.flatMap((r) => r.amenities))].map((name) => ({
+    '@type': 'LocationFeatureSpecification',
+    name,
+    value: true,
+  })),
+  makesOffer: rooms.map((r) => ({
+    '@type': 'Offer',
+    name: r.name,
+    url: new URL(`/rooms/#${r.id}`, site).href,
+    priceSpecification: {
+      '@type': 'UnitPriceSpecification',
+      price: r.priceFrom,
+      priceCurrency: hotel.currency,
+      unitText: 'night',
+    },
+    itemOffered: {
+      '@type': 'HotelRoom',
+      name: r.name,
+      description: r.summary,
+      bed: r.bed,
+      occupancy: { '@type': 'QuantitativeValue', maxValue: r.maxGuests },
+    },
+  })),
+};
+---
+
+<!doctype html>
+<html lang="en" class:list={[demoBanner.enabled && 'has-demo-banner']}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content={t.primary[800]} />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Open Graph / social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={hotel.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImage.alt} />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansFont} as="font" type="font/woff2" crossorigin />
+    {
+      heroPreload && (
+        <link
+          rel="preload"
+          as="image"
+          href={heroPreload.src}
+          imagesrcset={heroPreload.srcSet.attribute}
+          imagesizes="100vw"
+          fetchpriority="high"
+        />
+      )
+    }
+
+    <style is:inline set:html={themeCss}></style>
+
+    <!--
+      Runs before anything paints:
+      - js-anim: lets CSS hide elements that will animate in (no flash).
+      - dv-first: shows the preloader on the first visit of the session.
+      Both are skipped for prefers-reduced-motion, and a failsafe removes them
+      if the animation script never starts, so content is never stuck hidden.
+    -->
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        d.classList.add('js-anim');
+        try {
+          if (!sessionStorage.getItem('dv-visited')) d.classList.add('dv-first');
+        } catch (e) {}
+        setTimeout(function () {
+          if (!window.__dvAnim) d.classList.remove('js-anim', 'dv-first');
+        }, 4000);
+      })();
+    </script>
+
+    <!-- Smooth page-to-page navigation without full reloads -->
+    <ClientRouter fallback="swap" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <!-- Preloader: first visit only (src/scripts/animations/preloader.ts) -->
+    <div id="preloader" class="preloader fixed inset-0 z-100 flex-col items-center justify-center bg-primary-800" aria-hidden="true">
+      <svg class="h-24 w-24 sm:h-28 sm:w-28" viewBox="0 0 64 64" fill="none">
+        <rect data-pl-fill x="1" y="1" width="62" height="62" rx="14" fill="var(--color-primary-700)" opacity="0"></rect>
+        <path data-pl-fill d="M12 30 32 15l20 15h-6v4H18v-4z" fill="var(--color-accent-400)" opacity="0"></path>
+        <path data-pl-fill d="M19 36h26v14H19z" fill="var(--color-cream-50)" opacity="0"></path>
+        <g stroke="var(--color-accent-300)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round">
+          <rect data-pl-stroke x="1" y="1" width="62" height="62" rx="14"></rect>
+          <path data-pl-stroke d="M12 30 32 15l20 15h-6v4H18v-4z"></path>
+          <path data-pl-stroke d="M19 36h26v14H19z"></path>
+          <path data-pl-stroke d="M22 39h4v4h-4zM30 39h4v4h-4zM38 39h4v4h-4zM28 44h8v6h-8z"></path>
+        </g>
+      </svg>
+      <p data-pl-label class="mt-6 translate-y-2 font-serif text-2xl text-cream-50 opacity-0">{hotel.name}</p>
+    </div>
+
+    <DemoBanner />
+    <Header overlay={overlayHeader} />
+    <main id="main" class:list={['flex-1', !overlayHeader && 'pt-[calc(4.5rem+var(--banner-h))] lg:pt-[calc(5rem+var(--banner-h))]']}>
+      <slot />
+    </main>
+    <Footer />
+    <WhatsAppButton />
+
+    <!-- Persist across page transitions -->
+    <div class="grain" aria-hidden="true" transition:persist="grain"></div>
+    <div id="cursor-dot" class="cursor-dot" aria-hidden="true" transition:persist="cursor-dot"></div>
+    <div id="cursor-ring" class="cursor-ring" aria-hidden="true" transition:persist="cursor-ring">
+      <span class="absolute inset-0 rounded-full bg-accent-400 opacity-0"></span>
+      <span
+        id="cursor-label"
+        class="absolute inset-0 flex items-center justify-center text-[6px] font-bold tracking-widest text-ink-900 uppercase opacity-0"
+        >View</span
+      >
+    </div>
+
+    <script>
+      import '../scripts/animations/index';
+    </script>
+  </body>
+</html>

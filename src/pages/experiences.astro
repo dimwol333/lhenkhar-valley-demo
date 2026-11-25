@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Photo from '../components/Photo.astro';
+import Marquee from '../components/Marquee.astro';
+import CtaBanner from '../components/CtaBanner.astro';
+import { seo, experiences, pageHeroes, hotel } from '../data/hotel';
+---
+
+<BaseLayout title={seo.experiences.title} description={seo.experiences.description} ogImage={pageHeroes.experiences} heroImage={pageHeroes.experiences}>
+  <PageHero
+    image={pageHeroes.experiences}
+    eyebrow={`Discover ${hotel.address.region}`}
+    title="Experiences in the valley"
+    subtitle="Slow, authentic days out with local guides, arranged by our front desk."
+  />
+
+  <!--
+    Horizontal scroll (horizontal-scroll.ts): on desktop this section is pinned
+    and the row of cards slides sideways as you scroll. On mobile it stacks.
+  -->
+  <section class="hscroll-section relative bg-cream-100 py-24 lg:py-0" data-hscroll aria-labelledby="exp-title">
+    <div class="hscroll-track grid gap-10 px-5 sm:px-8 lg:gap-12 lg:px-[6vw]" data-hscroll-track>
+      <div class="max-w-xl lg:w-[34vw] lg:max-w-none lg:shrink-0 lg:pr-[4vw]">
+        <p class="eyebrow mb-4" data-fade>Things to do</p>
+        <h2 id="exp-title" class="text-5xl text-primary-800 sm:text-6xl lg:text-7xl" data-split>Explore at your own pace</h2>
+        <p class="mt-6 text-lg leading-relaxed text-ink-700" data-fade>
+          All experiences can be booked at reception or added to your enquiry. Guides speak English, Dzongkha, Nepali and Hindi.
+        </p>
+        <p class="mt-10 hidden items-center gap-3 text-xs font-semibold tracking-[0.25em] text-accent-700 uppercase lg:flex" aria-hidden="true">
+          Keep scrolling <span class="inline-block h-px w-16 bg-accent-500"></span>
+        </p>
+      </div>
+
+      {
+        experiences.map((exp, i) => (
+          <article
+            id={exp.id}
+            class="group flex scroll-mt-28 flex-col overflow-hidden rounded-[1.75rem] bg-cream-50 shadow-sm ring-1 ring-cream-200 lg:h-[76svh] lg:w-[42vw] lg:shrink-0 xl:w-[36vw]"
+            data-fade
+          >
+            <div class="relative aspect-7/5 overflow-hidden lg:aspect-auto lg:flex-1" data-cursor="image">
+              <div class="absolute inset-y-0 -left-[8%] w-[116%]" data-hscroll-img>
+                <Photo
+                  image={exp.image}
+                  widths={[480, 800, 1100]}
+                  sizes="(min-width: 1024px) 42vw, 100vw"
+                  class="h-full w-full object-cover transition-[scale] duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-[1.06]"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col p-7 sm:p-9">
+              <p class="eyebrow">
+                0{i + 1} · {exp.duration}
+              </p>
+              <h3 class="mt-2 text-4xl text-primary-800">{exp.title}</h3>
+              <p class="mt-3 leading-relaxed text-ink-700">{exp.description}</p>
+              <ul class="mt-4 flex flex-wrap gap-2 text-sm text-ink-700">
+                {exp.details.map((d) => (
+                  <li class="rounded-full border border-accent-500/40 px-3 py-1">{d}</li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+    <!-- Progress bar (desktop) -->
+    <div class="absolute inset-x-[6vw] bottom-8 hidden h-px bg-ink-900/10 lg:block" aria-hidden="true">
+      <div class="h-full origin-left bg-accent-500" style="transform: scaleX(0)" data-hscroll-progress></div>
+    </div>
+  </section>
+
+  <Marquee />
+  <CtaBanner />
+</BaseLayout>

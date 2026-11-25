@@ -1,0 +1,22 @@
+---
+import Photo from './Photo.astro';
+import { home, bookingCta, hotel } from '../data/hotel';
+const { cta } = home;
+---
+
+<section class="relative isolate overflow-hidden bg-primary-900">
+  <!-- data-parallax-bg: the image drifts while scrolling (reveals.ts) -->
+  <div class="absolute inset-x-0 -top-[15%] -z-10 h-[130%]" data-parallax-bg>
+    <Photo image={cta.image} widths={[640, 1024, 1600, 2000]} sizes="100vw" class="h-full w-full object-cover opacity-45" />
+  </div>
+  <div class="absolute inset-0 -z-10 bg-linear-to-r from-primary-900 via-primary-900/80 to-primary-900/40"></div>
+  <div class="container-page py-28 text-center sm:py-40">
+    <p class="eyebrow mb-5 text-accent-300!" data-fade>Reservations</p>
+    <h2 class="mx-auto max-w-3xl text-5xl text-cream-50 sm:text-7xl" data-split>{cta.title}</h2>
+    <p class="mx-auto mt-6 max-w-xl text-lg text-cream-100" data-fade>{cta.text}</p>
+    <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row" data-fade>
+      <a href={bookingCta.href} class="btn-accent px-9 text-base">{bookingCta.label}</a>
+      <a href={`tel:+${hotel.contact.phoneDigits}`} class="btn-outline-light">Call {hotel.contact.phone}</a>
+    </div>
+  </div>
+</section>

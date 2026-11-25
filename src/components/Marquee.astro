@@ -1,0 +1,35 @@
+---
+/** Endless word strip. Animation: src/scripts/animations/marquee.ts */
+import { home } from '../data/hotel';
+interface Props {
+  words?: string[];
+  tone?: 'light' | 'dark';
+}
+const { words = home.marquee, tone = 'light' } = Astro.props;
+// Repeat the words so one group is wider than any screen; the track holds two groups.
+const group = [...words, ...words];
+---
+
+<div
+  class:list={[
+    'overflow-hidden border-y py-6 sm:py-8',
+    tone === 'dark' ? 'border-cream-50/10 bg-primary-900 text-cream-50' : 'border-accent-500/30 bg-cream-50 text-primary-800',
+  ]}
+  data-marquee
+>
+  <p class="sr-only">{words.join(', ')}</p>
+  <div class="flex w-max will-change-transform" data-marquee-track aria-hidden="true">
+    {
+      [0, 1].map(() => (
+        <div class="flex shrink-0 items-center">
+          {group.map((w) => (
+            <span class="flex items-center font-serif text-4xl whitespace-nowrap italic sm:text-6xl">
+              <span class="px-6 sm:px-10">{w}</span>
+              <span class="text-2xl text-accent-500 not-italic sm:text-3xl">•</span>
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>

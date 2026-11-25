@@ -1,0 +1,28 @@
+---
+/**
+ * Hero for inner pages. Same motion as the home hero, lighter:
+ * Ken Burns zoom, masked word reveal for the title, parallax, scroll cue.
+ */
+import Photo from './Photo.astro';
+import type { SiteImage } from '../data/images';
+
+interface Props {
+  image: SiteImage;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+}
+const { image, eyebrow, title, subtitle } = Astro.props;
+---
+
+<section class="relative isolate flex min-h-[70svh] items-end overflow-hidden bg-primary-900 sm:min-h-[80svh]" data-hero>
+  <div class="absolute inset-0 -z-10 overflow-hidden" data-hero-media>
+    <Photo image={image} priority widths={[640, 1024, 1440, 2000]} sizes="100vw" class="h-full w-full object-cover" data-hero-img="" />
+  </div>
+  <div class="absolute inset-0 -z-10 bg-linear-to-t from-ink-900/85 via-ink-900/35 to-ink-900/40"></div>
+  <div class="container-page pt-32 pb-16 sm:pb-24" data-hero-content>
+    {eyebrow && <p class="eyebrow mb-5 text-accent-300" data-hero-fade>{eyebrow}</p>}
+    <h1 class="max-w-4xl text-6xl text-cream-50 sm:text-7xl lg:text-8xl" data-hero-title="words">{title}</h1>
+    {subtitle && <p class="mt-6 max-w-2xl text-lg leading-relaxed text-cream-100 sm:text-xl" data-hero-fade>{subtitle}</p>}
+  </div>
+</section>

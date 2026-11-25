@@ -1,0 +1,34 @@
+---
+/**
+ * Slim strip fixed at the very top of every page, promoting the designer.
+ * Turn it off with `demoBanner.enabled = false` in src/data/hotel.ts.
+ * Its height is the CSS variable --banner-h (global.css); the header sits below it.
+ */
+import { demoBanner } from '../data/hotel';
+const href = `https://wa.me/${demoBanner.whatsapp}?text=${encodeURIComponent(demoBanner.message)}`;
+---
+
+{
+  demoBanner.enabled && (
+    <div
+      class="fixed inset-x-0 top-0 z-70 flex h-(--banner-h) items-center justify-center bg-ink-900 px-4 text-cream-100"
+      transition:persist="demo-banner"
+      data-demo-banner
+    >
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener"
+        class="group truncate text-[11px] tracking-wide sm:text-xs"
+      >
+        Sample <span class="hidden sm:inline">website designed</span><span class="sm:hidden">site</span> by <span class="font-semibold text-cream-50">{demoBanner.designer}</span>
+        <span class="hidden sm:inline"> · Want one for your hotel?</span>
+        <span aria-hidden="true"> · </span>
+        <span class="font-semibold text-accent-300 underline decoration-accent-300/50 underline-offset-2 group-hover:decoration-accent-300">
+          Chat on WhatsApp
+        </span>
+        <span class="sr-only"> (opens in a new tab)</span>
+      </a>
+    </div>
+  )
+}
